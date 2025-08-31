@@ -55,3 +55,14 @@ package_upgrade: true
 ```
 ![alt text](IMAGES/6.PNG)
 
+And Launch VM with this cloud_config
+
+# Step 4
+
+Go to master node and run the below command 
+
+```bash
+ansible all -i '172.31.38.106,' -u ubuntu -m ping
+```
+
+This will ping the node and let you know that connection was established.
