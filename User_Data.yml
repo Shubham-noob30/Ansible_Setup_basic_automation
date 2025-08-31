@@ -1,0 +1,13 @@
+#config
+users:
+  - default
+  - name: Ansible_usr
+    groups: sudo
+    shell: /bin/bash
+    sudo: ['ALL=(ALL) NOPASSWD:ALL']
+    ssh_authorized_keys:
+      - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIK9IlRRIvHrqDeRHhCQrRM3RcBVYluV72WT+j9bu7Y3r ubuntu@ip-172-31-35-61
+  
+#Update and install
+package_update: true
+package_upgrade: true
