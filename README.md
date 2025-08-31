@@ -25,7 +25,7 @@ ssh-keygen
 ![alt text](IMAGES/3.PNG)
 ![alt text](IMAGES/4.PNG)
 
-This will generate key and keep clicking enter until files are created. You can make chnages but default settings are ok. The command created 3 files id_ed25519, id_ed25519.pub and authorized_keys.
+This will generate key and keep clicking enter until files are created. You can make changes but default settings are ok. The command created 3 files id_ed25519, id_ed25519.pub and authorized_keys.
 Now run the below command.
 
 ```bash
