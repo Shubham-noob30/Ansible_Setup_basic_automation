@@ -1,7 +1,7 @@
 # About this Ansible_Project
 Trying to make a basic automation via Ansible to retrive data from new VM's. Along with setup automation and connection with Node.
 
-# Step 1
+## Step 1
 We need to have VM configured. In this project I am using AWS as it has free tier t2.micro Instances. First make a Instane which is going to be out master node (Ubuntu instances) and configure it. We will now SSH into the VM using Console connect or SSH via Public IP address. 
 
 ![alt text](IMAGES/1.PNG)
@@ -15,7 +15,7 @@ sudo apt install ansible -y
 ```
 ![alt text](IMAGES/2.PNG)
 
-# Step 2
+## Step 2
 The above command will install the important packages and also install Ansible. 
 Once done run the below command.
 
@@ -36,7 +36,7 @@ COPY the output we will need it in User_Data.yml
 
 ![alt text](IMAGES/5.PNG)
 
-# Step 3
+## Step 3
 
 Create a Node VM and Copy the User_Data.yml in User Data of VM
 
@@ -57,7 +57,7 @@ package_upgrade: true
 
 And Launch VM with this cloud_config
 
-# Step 4
+## Step 4
 
 Go to master node and run the below command 
 
