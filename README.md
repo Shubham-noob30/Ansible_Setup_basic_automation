@@ -67,3 +67,13 @@ ansible all -i '172.31.38.106,' -u ubuntu -m ping
 ![alt text](IMAGES/7.PNG)
 
 This will ping the node and let you know that connection was established.
+
+## Notes:- Making Inventory for the all the nodes.
+
+The Inventory file is made in ~/.ansible file in master node.
+
+```bash
+echo "172.30.38.170" >> ~/.ansible/Inventory_name
+```
+![alt text](IMAGES/8.PNG)
+
