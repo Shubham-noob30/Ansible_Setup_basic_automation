@@ -75,5 +75,11 @@ The Inventory file is made in ~/.ansible file in master node.
 ```bash
 echo "172.30.38.170" >> ~/.ansible/Inventory_name
 ```
+To run the inventory file follow the below command.
+
+```bash
+ansible$ ansible all -i hosts -m ping
+```
+
 ![alt text](IMAGES/8.PNG)
 
