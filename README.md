@@ -34,3 +34,24 @@ cat id_ed25519.pub
 ```
 COPY the output we will need it in User_Data.yml
 
+![alt text](IMAGES/5.PNG)
+
+# Step 3
+
+Create a Node VM and Copy the User_Data.yml in User Data of VM
+
+```yml
+#cloud-config
+users:
+  - default
+  - name: ubuntu
+    sudo: ALL=(ALL) NOPASSWD:ALL
+    ssh_authorized_keys:
+      - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAEHCCQz560+fkq7kExTOt4CnLJOt7+R9IyxwW4WKIwn ubuntu@ip-172-31-41-30
+  
+#Update and install
+package_update: true
+package_upgrade: true
+```
+![alt text](IMAGES/6.PNG)
+

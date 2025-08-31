@@ -1,12 +1,10 @@
-#config
+#cloud-config
 users:
   - default
-  - name: Ansible_usr
-    groups: sudo
-    shell: /bin/bash
-    sudo: ['ALL=(ALL) NOPASSWD:ALL']
+  - name: ubuntu
+    sudo: ALL=(ALL) NOPASSWD:ALL
     ssh_authorized_keys:
-      - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIK9IlRRIvHrqDeRHhCQrRM3RcBVYluV72WT+j9bu7Y3r ubuntu@ip-172-31-35-61
+      - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAEHCCQz560+fkq7kExTOt4CnLJOt7+R9IyxwW4WKIwn ubuntu@ip-172-31-41-30
   
 #Update and install
 package_update: true
