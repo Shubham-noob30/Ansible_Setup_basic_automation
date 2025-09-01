@@ -1,13 +1,11 @@
 ---
-- name: Check disk space usage
-  hosts: all
-  gather_facts: no
+- name: Gather Disk Information
+  hosts: your_hosts
+  gather_facts: yes
   tasks:
-    - name: Run df -h command
-      command: df -h
-      register: disk_usage
-
-    - name: Display disk usage
+    - name: Display Disk Information
       debug:
-        var: disk_usage.stdout_lines
-
+        var: ansible_facts.devices
+    - name:
+      debug:
+        var: ansible_facts.devices.keys()
