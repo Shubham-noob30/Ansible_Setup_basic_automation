@@ -1,11 +1,25 @@
 ---
 - name: Gather Disk Information
-  hosts: your_hosts
+  hosts: all
+  connection: local 
   gather_facts: yes
+
   tasks:
+
     - name: Display Disk Information
+      shell: df -h /dev/root | awk 'NR==2 {print "Disk Size:" $2  "\n" "Used Storage:" $4}'
+      register: disk_info
+
+    - name: Show Disk Size and Available Space
+      debug: 
+        msg: "{{ disk_info.stdout }}"
+
+    - name: Display memory information
+      shell: free -h | awk 'NR==2 {print "Total Memory:" $2 "\n" "Available Memory:" $7}'
+      register: mem
+
+    - name: Show Memory Information
       debug:
-        var: ansible_facts.devices
-    - name:
-      debug:
-        var: ansible_facts.devices.keys()
+        msg:  |
+          Host: {{ inventory_hostname }}
+          {{ mem.stdout }}
