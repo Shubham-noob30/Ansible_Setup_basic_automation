@@ -23,3 +23,28 @@
         msg:  |
           Host: {{ inventory_hostname }}
           {{ mem.stdout }}
+
+          ---
+- name: Check server uptime
+  hosts: all                                                       # Replace with your inventory group or host
+  gather_facts: yes                                                # No need to gather extensive facts for this simple check
+
+  tasks:
+    - name: Execute uptime command
+      ansible.builtin.command: uptime -p
+      register: uptime_output
+      changed_when: true
+
+    - name: Display uptime
+      ansible.builtin.debug:
+        var: uptime_output.stdout
+
+    - name: Debug disk information
+      debug:
+        var: ansible_facts.devices # Shows details about all disks
+      when: ansible_facts.devices is defined
+
+    - name: Debug mounted filesystem information
+      debug:
+        var: ansible_facts.mounts # Shows details about mounted filesystems
+      when: ansible_facts.mounts is defined
