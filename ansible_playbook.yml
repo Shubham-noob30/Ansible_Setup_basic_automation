@@ -1,50 +1,47 @@
 ---
-- name: Gather Disk Information
+- name: Information of System
   hosts: all
-  connection: local 
+  connection: local
   gather_facts: yes
-
-  tasks:
-
-    - name: Display Disk Information
-      shell: df -h /dev/root | awk 'NR==2 {print "Disk Size:" $2  "\n" "Used Storage:" $4}'
-      register: disk_info
-
-    - name: Show Disk Size and Available Space
-      debug: 
-        msg: "{{ disk_info.stdout }}"
-
-    - name: Display memory information
-      shell: free -h | awk 'NR==2 {print "Total Memory:" $2 "\n" "Available Memory:" $7}'
-      register: mem
-
-    - name: Show Memory Information
-      debug:
-        msg:  |
-          Host: {{ inventory_hostname }}
-          {{ mem.stdout }}
-
-          ---
-- name: Check server uptime
-  hosts: all                                                       # Replace with your inventory group or host
-  gather_facts: yes                                                # No need to gather extensive facts for this simple check
-
+  
   tasks:
     - name: Execute uptime command
       ansible.builtin.command: uptime -p
       register: uptime_output
       changed_when: true
 
-    - name: Display uptime
-      ansible.builtin.debug:
-        var: uptime_output.stdout
+    - name: Find root mount point details
+      set_fact:
+        root_info: "{{ ansible_mounts | selectattr('mount', 'equalto', '/') | first }}"
 
-    - name: Debug disk information
-      debug:
-        var: ansible_facts.devices # Shows details about all disks
-      when: ansible_facts.devices is defined
+    - name: Get available memory information
+      ansible.builtin.shell: free -m | awk 'NR==2 {print $7}'
+      register: meminfo
 
-    - name: Debug mounted filesystem information
-      debug:
-        var: ansible_facts.mounts # Shows details about mounted filesystems
-      when: ansible_facts.mounts is defined
+    - name: Add header row to CSV (only once)
+      lineinfile:
+        path: "success_servers_{{ ansible_date_time.date }}_{{ ansible_date_time.hour }}{{ ansible_date_time.minute }}.csv"
+        line: "Host,Distribution,Version,RootTotal,RootAvailable,RootUsed,TotalMem(MB),AvailMem(MB),Uptime"
+        create: yes
+        insertafter: BOF
+      delegate_to: localhost
+      run_once: true
+
+    - name: Collect success data
+      lineinfile:
+        path: "success_servers_{{ ansible_date_time.date }}_{{ ansible_date_time.hour }}{{ ansible_date_time.minute }}.csv"
+        line: "{{ inventory_hostname }},{{ ansible_distribution }},{{ ansible_distribution_version }},{{ root_info.size_total | human_readable }},{{ root_info.size_available | human_readable }},{{ (root_info.size_total | int - root_info.size_available | int) | human_readable }},{{ ansible_memtotal_mb }},{{ meminfo.stdout }},{{ uptime_output.stdout }}"
+        create: yes
+      delegate_to: localhost
+
+- name: Capture failed hosts
+  hosts: all
+  gather_facts: no
+  tasks:
+    - name: Write failed hosts to file
+      lineinfile:
+        path: "failed_servers_{{ ansible_date_time.date }}_{{ ansible_date_time.hour }}{{ ansible_date_time.minute }}.txt"
+        line: "{{ inventory_hostname }}"
+        create: yes
+      delegate_to: localhost
+      when: ansible_failed_task is defined
