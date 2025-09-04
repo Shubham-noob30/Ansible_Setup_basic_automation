@@ -1,14 +1,17 @@
 ---
 - name: Information of System
   hosts: all
-  connection: local
   gather_facts: yes
-  
+  vars:
+    ansible_facts_cache_timeout: 0
+    ansible_ssh_common_args: "-o StrictHostKeyChecking=no"
+
   tasks:
+    
     - name: Execute uptime command
       ansible.builtin.command: uptime -p
       register: uptime_output
-      changed_when: true
+      changed_when: false   # uptime always changes, avoid marking host "changed"
 
     - name: Find root mount point details
       set_fact:
@@ -30,18 +33,60 @@
     - name: Collect success data
       lineinfile:
         path: "success_servers_{{ ansible_date_time.date }}_{{ ansible_date_time.hour }}{{ ansible_date_time.minute }}.csv"
-        line: "{{ inventory_hostname }},{{ ansible_distribution }},{{ ansible_distribution_version }},{{ root_info.size_total | human_readable }},{{ root_info.size_available | human_readable }},{{ (root_info.size_total | int - root_info.size_available | int) | human_readable }},{{ ansible_memtotal_mb }},{{ meminfo.stdout }},{{ uptime_output.stdout }}"
+        line: "{{ inventory_hostname }},{{ ansible_distribution }},{{ ansible_distribution_version }},{{ root_info.size_total | human_readable }},{{ root_info.size_available | human_readable }},{{ (root_info.size_total | int - root_info.size_available | int) | human_readable }},{{ ansible_memtotal_mb }},{{ meminfo.stdout }},\"{{ uptime_output.stdout }}\""
         create: yes
       delegate_to: localhost
 
-- name: Capture failed hosts
+---
+- name: Information of System
   hosts: all
-  gather_facts: no
+  gather_facts: yes
+  vars:
+    ansible_facts_cache_timeout: 0
+    ansible_ssh_common_args: "-o StrictHostKeyChecking=no"
+
   tasks:
-    - name: Write failed hosts to file
+    - name: Execute uptime command
+      ansible.builtin.command: uptime -p
+      register: uptime_output
+      changed_when: false   # uptime always changes, avoid marking host "changed"
+
+    - name: Find root mount point details
+      set_fact:
+        root_info: "{{ ansible_mounts | selectattr('mount', 'equalto', '/') | first }}"
+
+    - name: Get available memory information
+      ansible.builtin.shell: free -m | awk 'NR==2 {print $7}'
+      register: meminfo
+
+    - name: Add header row to CSV (only once)
       lineinfile:
-        path: "failed_servers_{{ ansible_date_time.date }}_{{ ansible_date_time.hour }}{{ ansible_date_time.minute }}.txt"
-        line: "{{ inventory_hostname }}"
+        path: "success_servers_{{ ansible_date_time.date }}_{{ ansible_date_time.hour }}{{ ansible_date_time.minute }}.csv"
+        line: "Host,Distribution,Version,RootTotal,RootAvailable,RootUsed,TotalMem(MB),AvailMem(MB),Uptime"
+        create: yes
+        insertafter: BOF
+      delegate_to: localhost
+      run_once: true
+
+    - name: Collect success data
+      lineinfile:
+        path: "success_servers_{{ ansible_date_time.date }}_{{ ansible_date_time.hour }}{{ ansible_date_time.minute }}.csv"
+        line: "{{ inventory_hostname }},{{ ansible_distribution }},{{ ansible_distribution_version }},{{ root_info.size_total | human_readable }},{{ root_info.size_available | human_readable }},{{ (root_info.size_total | int - root_info.size_available | int) | human_readable }},{{ ansible_memtotal_mb }},{{ meminfo.stdout }},\"{{ uptime_output.stdout }}\""
         create: yes
       delegate_to: localhost
-      when: ansible_failed_task is defined
+
+- name: Capture failed/unreachable hosts
+  hosts: all
+  gather_facts: no
+  ignore_unreachable: yes
+  tasks:
+    - block:
+        - name: Ping host
+          ansible.builtin.ping:
+      rescue:
+        - name: Write unreachable host to file
+          lineinfile:
+            path: "failed_servers_{{ ansible_date_time.date }}_{{ ansible_date_time.hour }}{{ ansible_date_time.minute }}.txt"
+            line: "{{ inventory_hostname }} - UNREACHABLE"
+            create: yes
+          delegate_to: localhost
