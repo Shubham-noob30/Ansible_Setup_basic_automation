@@ -83,3 +83,16 @@ ansible$ ansible all -i hosts -m ping
 
 ![alt text](IMAGES/8.PNG)
 
+## Step 5
+Once above command is done run the ansible_playbook.yml using below command
+
+```bash
+ansible-playbook -i inventory_hosts ansible_playbook.yml
+```
+And this will give output of successfull servers in CSV format
+
+![alt text](IMAGES/9.PNG)
+
+And the we can cat the csv to open and see it.
+
+![alt text](10.PNG)
